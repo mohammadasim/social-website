@@ -6,6 +6,7 @@
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="{% static 'css/base.css' %}" rel="stylesheet" type="text">
+    <link href="{% static 'css/bookmarklet.css' %}" rel="stylesheet" type="text">
 </head>
 <body>
 <div class="header">
@@ -51,5 +52,25 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script>
+    var csrftoken = Cookies.get('csrftoken');
+    function csrfSafeMethod(method){
+    // These HTTP method do not require CSRF protection.
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+    if(!csrfSafeMethod(settings.type) && !this.crossDomain) {
+    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    }
+    }
+    });
+    $(document).ready(function(){
+    {% block domready %}
+    {% endblock %}
+    });
+</script>
 </body>
 </html>

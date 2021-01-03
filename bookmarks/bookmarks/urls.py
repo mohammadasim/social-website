@@ -24,6 +24,7 @@ urlpatterns = [
     path('account/', include('accounts.urls')),
     path('social-auth/',
          include('social_django.urls', namespace='social')),
+    path('images/', include('images.urls', namespace='images')),
 ]
 # In this way, the Django development server will
 # be in charge of serving the media files during
