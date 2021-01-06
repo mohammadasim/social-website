@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Images bookmarked{% endblock %}
+
+{% block content %}
+<h1>Images bookmarked</h1>
+<div id="image-list">
+    {% include 'images/image/list_ajax.html' %}
+</div>
+{% endblock content %}
+{% block domready %}
+{% comment %}
+We define the following variables
+page: stores the current page number.
+empty_page: Allows you to know whether the user is on the last
+page and retrieves an empty page. As soon as you get an empty page
+you will stop sending additional AJAX requests because will assume
+that there are no more results.
+block_request: Prevents you from sending additional requests.
+
+You use $(window).scroll() to capture the scroll event and also to
+define a handler function.
+You calculate the margin variable to get the difference between the 
+total document height and the window height, because that's the height
+of the remaining content for the user to scroll.
+You subtract a value of 200 from the result so that you load the next
+page when the user is closer than 200 pixels to the bottom of the page.
+You only send an AJAX request if no other AJAX request is being done.
+(block_request has to be false) and the user did not get to the last page
+of results (empty_page is also false)
+You set block_request to true to avoid a situation where the scroll event 
+triggers additional AJAX requests, and increase the page counter by one,
+in order to retrieve the next page.
+You perform an AJAX GET request using $.get() and receive the HTML response in
+a variable called data. There are two scenarios.
+The response has no content: You got to the end of the results, and there are not
+more pages to load. You set empty_page to true to prevent additional AJAX request.
+The response contains data: You append the data to the HTML element with the 
+image-list ID. The page content expands vertically, appending results when the user 
+approaches the bottom of the page.
+{% endcomment %}
+var page = 1;
+var empty_page = false;
+var block_request = false;
+
+$(window).scroll(function(){
+    var margin = $(document).height() - $(window).height() - 200;
+    if ($(window).scrollTop() > margin && empty_page == false && block_request == false) {
+        block_request = true;
+        page += 1;
+        $.get('?page=' + page, function(data){
+            if(data == ''){
+                empty_page = true;
+            }
+            else {
+                block_request = false;
+                $('#image-list').append(data);
+            }
+        });
+    }
+});
+{% endblock domready %}
