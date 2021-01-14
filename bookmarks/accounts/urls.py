@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from .views import dashboard, register, edit
+from .views import dashboard, register, edit, user_list, user_detail, user_follow
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
@@ -33,4 +33,7 @@ urlpatterns = [
          name='password_reset_complete'),
     path('register/', register, name='register'),
     path('edit/', edit, name='edit'),
+    path('users/', user_list, name='user_list'),
+    path('user/follow/', user_follow, name='user_follow'),
+    path('users/<username>/', user_detail, name='user_detail'),
 ]

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block title %}{{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ user.get_full_name }}</h1>
+<div class="profile-info">
+    <img src="{% thumbnail user.profile.photo 180x180 %}" class="user-detail">
+</div>
+{% with total_followers=user.followers.count %}
+<span class="count">
+    <span class="total">{{ total_followers }}</span>
+    follower{{ total_followers|pluralize }}
+</span>
+<a href="#" data-id="{{ user.id }}" data-action="{% if request.user in user.followers.all %}un{% endif %}follow" class="follow button">
+    {% if request.user not in user.followers.all %}
+    Follow
+    {% else %}
+    Unfollow
+    {% endif %}
+</a>
+<div id="image-list" class="image-container">
+    {% include "images/image/list_ajax.html" with images=user.images_created.all %}
+</div>
+{% endwith %}
+{% endblock %}
+{% block domready %}
+$('a.follow').click(function(e){
+    e.preventDefault();
+    var data = {
+        id: $(this).data('id'),
+        action: $(this).data('action')
+    };
+    $.ajax({
+        method: "POST",
+        data: data,
+        dataType: "json",
+        url: '{% url "user_follow" %}'
+    })
+    .done( function (data) {
+    if(data['status'] == 'ok'){
+    var previous_action = $('a.follow').data('action');
+
+    //toggle data-action
+    // conditional(ternary) operator
+    // if the value of previous_action is equal to follow, then set its new
+    // value to unfollow, otherwise set it to follow.
+    $('a.follow').data('action', previous_action == 'follow' ? 'unfollow' : 'follow');
+    // toogle link text
+    $('a.follow').text(
+    previous_action == 'follow' ? 'Unfollow' : 'Follow'
+    )
+    // Update total followers
+    var previous_followers = parseInt(
+    $('span.count .total').text()
+    );
+    $('span.count .total').text(previous_action == 'follow' ?
+    previous_followers + 1 : previous_followers -1
+    );
+    }
+    })
+    .fail( function(){
+        alert('Sorry your request to follow the user failed.')
+    } )
+ });
+ {% endblock domready %}

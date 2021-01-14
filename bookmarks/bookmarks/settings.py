@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from django.urls import reverse_lazy
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -148,3 +150,10 @@ SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY')
 SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET')
+
+# Django adds a get_absolute_url() method dynamically to any model that appear
+# in the ABSOLUTE_URL_OVERRIDES setting. This method returns the corresponding
+# URL for the given model specified in the setting.
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda x: reverse_lazy('user_detail', args=[x.username])
+}
