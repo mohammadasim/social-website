@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'images.apps.ImagesConfig',
     'easy_thumbnails',
+    'actions.apps.ActionsConfig',
 ]
 
 MIDDLEWARE = [
@@ -157,3 +158,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET')
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda x: reverse_lazy('user_detail', args=[x.username])
 }
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
