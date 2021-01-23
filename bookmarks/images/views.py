@@ -19,7 +19,7 @@ from actions.utils import create_action
 # redis connection
 r = redis.Redis(host=settings.REDIS_HOST,
                 port=settings.REDIS_PORT,
-                db=settings.REDIS_PORT)
+                db=settings.REDIS_DB)
 
 
 @login_required
@@ -50,6 +50,10 @@ def image_detail(request, id, slug):
     image = get_object_or_404(Image, id=id, slug=slug)
     # increment total image views by 1
     total_views = r.incr(f'image:{image.id}:views')
+    # increment image ranking by 1
+    # zincrby increment the score of value in sorted set name
+    # by amount zincrby(name, amount, value)
+    r.zincrby('image_ranking', 1, image.id)
     return render(request,
                   'images/image/detail.html',
                   {'section': 'images',
@@ -102,3 +106,28 @@ def image_list(request):
     return render(request,
                   'images/image/list.html',
                   {'section': 'images', 'images': images})
+
+
+# Not working
+@login_required
+def image_rankings(request):
+    # get image ranking dictionary
+    # According to redis doc negative count
+    # returns all elements from the offset.
+    # Here starting from 0 and using -1 we
+    # want to retrieve all the element of image_ranking.
+    # we also set desc=True to set result descending to true.
+    image_ranking = r.zrange('image_ranking', 0, -1,
+                             desc=True)[:10]
+    # we create a list of ids, as image_ranking are not int
+    image_ranking_ids = [int(id) for id in image_ranking]
+    # get most viewed images and set it in a list.
+    most_viewed = list(Image.objects.filter(
+        id__in=image_ranking_ids
+    ))
+    # sort images based on index of image in image_ranking_ids
+    most_viewed.sort(key=lambda x: image_ranking_ids.index(x.id))
+    return render(request,
+                  'images/image/ranking.html',
+                  {'section': 'images',
+                   'most_viewed': most_viewed})

@@ -20,6 +20,9 @@ class Image(models.Model):
                                        blank=True)
     total_likes = models.PositiveIntegerField(db_index=True, default=0)
 
+    class Meta:
+        ordering = ['-created']
+
     def __str__(self):
         return self.title
 
